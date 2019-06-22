@@ -9,10 +9,9 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -45,7 +44,11 @@ public class Controller implements Initializable {
     @FXML
     private AnchorPane root;
     @FXML
-    private Button openFile;
+    private VBox vBox;
+    @FXML
+    private Label handleInfo;
+    @FXML
+    private Button openFileButton;
     private FileChooser fileChooser;
 
     private static final String NEW_FILE_PREFIX = "new-";
@@ -61,7 +64,8 @@ public class Controller implements Initializable {
         File file = fileChooser.showOpenDialog(currentWindow);
         String newName;
         String newPath;
-        if (file.exists()) {
+        if (file != null && file.exists()) {
+            handleInfo.setVisible(false);
             newName = NEW_FILE_PREFIX + file.getName();
             newPath = file.getParent() + DIR_SEPARATOR + newName;
             File newFile = new File(newPath);
@@ -74,20 +78,14 @@ public class Controller implements Initializable {
                 if (newFile.createNewFile()) {
                     log.info("新建文件：{}", newFile.getName());
                 }
-                CompletableFuture<FileHandleTask.HandleResult> future = CompletableFuture.supplyAsync(new FileHandleTask(file, newFile));
-                Timeline timeline = new Timeline();
-                timeline.setCycleCount(Timeline.INDEFINITE);
-                KeyFrame keyFrame = new KeyFrame(Duration.millis(200), event1 -> {
-
-                });
-                timeline.getKeyFrames().add(keyFrame);
-                timeline.play();
+                CompletableFuture<FileHandleTask.HandleResult> future = CompletableFuture.supplyAsync(new FileHandleTask(openFileButton, file, newFile));
+                FileHandleProgress progress = new FileHandleProgress(vBox);
+                progress.start();
                 future.whenCompleteAsync((handleResult, throwable) -> {
-                    timeline.stop();
                     if (handleResult.isSuccess()) {
-                        popupSuccess(handleResult.getResult(), "处理成功！");
+                        popupSuccess(progress, handleResult.getResult(), "处理成功！");
                     } else {
-                        popupSuccess(handleResult.getResult(), "处理失败！");
+                        popupSuccess(progress, handleResult.getResult(), "处理失败！");
                     }
                 });
             } catch (IOException e) {
@@ -96,9 +94,14 @@ public class Controller implements Initializable {
         }
     }
 
-    private void popupSuccess(String msg, String title) {
+    private void popupSuccess(FileHandleProgress progress, String msg, String title) {
         Platform.runLater(() -> {
             try {
+                openFileButton.setText("打开文件");
+                openFileButton.setDisable(false);
+                handleInfo.setVisible(true);
+                handleInfo.setText(msg);
+                progress.stop();
                 Alert _alert = new Alert(Alert.AlertType.INFORMATION);
                 _alert.setTitle(title);
                 _alert.setContentText(msg);

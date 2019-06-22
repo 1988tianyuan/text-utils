@@ -23,8 +23,9 @@ public class Main extends Application {
             System.exit(-1);
         }
         Parent root = FXMLLoader.load(bootLocation);
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setTitle("给舟雄的翻转工具");
+        primaryStage.setScene(new Scene(root, 600, 400));
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

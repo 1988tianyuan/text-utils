@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.function.Supplier;
 
+import javafx.application.Platform;
+import javafx.scene.control.Button;
 import org.apache.commons.io.FileUtils;
 
 import lombok.Builder;
@@ -18,12 +20,15 @@ public class FileHandleTask implements Supplier<FileHandleTask.HandleResult> {
 	
 	private File file;
 	private File newFile;
-	public FileHandleTask(File file, File newFile) {
+	private Button openFileButton;
+	public FileHandleTask(Button openFileButton, File file, File newFile) {
+		this.openFileButton = openFileButton;
 		this.file = file;
 		this.newFile = newFile;
 	}
 	@Override
 	public HandleResult get() {
+		setButtonDisable();
 		String result;
 		boolean isSuccess;
 		try (RandomAccessFile rdFile = new RandomAccessFile(file, "r")) {
@@ -56,7 +61,14 @@ public class FileHandleTask implements Supplier<FileHandleTask.HandleResult> {
 		}
 		return HandleResult.builder().result(result).success(isSuccess).build();
 	}
-	
+
+	private void setButtonDisable() {
+		Platform.runLater(() -> {
+			openFileButton.setText("正在处理，请稍等...");
+			openFileButton.setDisable(true);
+		});
+	}
+
 	private String writeFile(RandomAccessFile rdFile, String readStr) throws Exception {
 		String readOrigin = rdFile.readLine();
 		if (readOrigin != null) {
