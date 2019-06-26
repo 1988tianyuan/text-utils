@@ -42,10 +42,18 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
+        <!-- guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>28.0-jre</version>
+        </dependency>
+
 
     </dependencies>
 
     <build>
+        <finalName>file-handle-utils</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

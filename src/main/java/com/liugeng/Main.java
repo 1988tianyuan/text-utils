@@ -17,7 +17,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        URL bootLocation = getClass().getClassLoader().getResource("sample.fxml");
+        URL bootLocation = getClass().getClassLoader().getResource("main.fxml");
         if (bootLocation == null) {
             log.error("找不到启动页面！启动失败");
             System.exit(-1);
