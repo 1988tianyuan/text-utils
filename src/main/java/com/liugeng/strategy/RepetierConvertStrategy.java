@@ -37,11 +37,13 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
         LinkedList<String> zLineQueue = new LinkedList<>();
         LinkedList<String> codeQueue = new LinkedList<>();
         ListIterator<String> iterator = filteredLines.listIterator();
+        int layerCount = 0;
         while (iterator.hasNext()) {
             String line = iterator.next();
             if (isLayer(line)) {
                 if (!codeQueue.isEmpty() && isZLine(codeQueue.getLast())) {
-                    handleLayer(codeQueue, newLines);
+                    layerCount++;
+                    handleLayer(codeQueue, newLines, layerCount);
                 }
                 codeQueue.clear();
                 String zLine = zLineQueue.pollFirst();
@@ -57,13 +59,14 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
             }
             if (!iterator.hasNext()) {
                 if (!codeQueue.isEmpty() && isZLine(codeQueue.getLast())) {
-                    handleLayer(codeQueue, newLines);
+                    layerCount++;
+                    handleLayer(codeQueue, newLines, layerCount);
                 }
             }
         }
     }
     
-    private void handleLayer(LinkedList<String> codeQueue, List<String> newLines) {
+    private void handleLayer(LinkedList<String> codeQueue, List<String> newLines, int layerCount) {
         if (CollectionUtils.isNotEmpty(codeQueue) && codeQueue.size() > 2) {
             String zLine = codeQueue.pollLast();
             String zValue = parseZLine(zLine);
@@ -71,11 +74,13 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
             String endLine = codeQueue.pollFirst();
             String parsedFirstLine = parseG1Line(firstLine, zValue, false);
             String parsedEndLine = parseG1Line(endLine, zValue, false);
-            String prefix = layerPrefixBuilder(parsedFirstLine);
+            String prefix = layerPrefixBuilder(parsedFirstLine, layerCount);
             newLines.add(prefix);
             newLines.add(parsedFirstLine);
             handleLayerLines(codeQueue, newLines, zValue);
             newLines.add(parsedEndLine);
+            newLines.add("");
+            newLines.add("");
             newLines.add("");
         }
     }
@@ -119,20 +124,26 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
     }
     
     private boolean isG1(String line) {
-        return StringUtils.startsWith(line, PREFIX_G1);
+        boolean beginWithG1 = StringUtils.startsWith(line, PREFIX_G1);
+        boolean notHasX = !StringUtils.contains(line, "X");
+        boolean notHasY = !StringUtils.contains(line, "Y");
+        boolean notHasZ = !StringUtils.contains(line, "Z");
+        boolean notValidG1 = notHasX && notHasY && notHasZ;
+        return beginWithG1 && !notValidG1;
     }
     
     private boolean prefixFilter(String line) {
         return isLayer(line) || isG1(line);
     }
     
-    private String layerPrefixBuilder(String code) {
+    private String layerPrefixBuilder(String code, int layerCount) {
         double falseVELCP = (double) data.get("falseVELCP");
         double trueVELCP = (double) data.get("trueVELCP");
-        return "$OUT[159]=FALSE\n"
-            + "$VEL.CP=" + falseVELCP + "\n"
-            + code + "\n"
-            + "$OUT[159]=true\n"
+        return "$OUT[159]=FALSE\r\n"
+            + ";layer=" + layerCount + "\r\n"
+            + "$VEL.CP=" + falseVELCP + "\r\n"
+            + code + "\r\n"
+            + "$OUT[159]=TRUE\r\n"
             + "$VEL.CP="+ trueVELCP;
     }
     

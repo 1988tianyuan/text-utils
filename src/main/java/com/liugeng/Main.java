@@ -23,7 +23,7 @@ public class Main extends Application {
             System.exit(-1);
         }
         Parent root = FXMLLoader.load(bootLocation);
-        primaryStage.setTitle("给舟雄的翻转工具");
+        primaryStage.setTitle("给舟雄的文件处理工具");
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.setResizable(false);
         primaryStage.show();
