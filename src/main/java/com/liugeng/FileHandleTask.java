@@ -58,6 +58,7 @@ public class FileHandleTask implements Supplier<HandleResult> {
 			log.error("读取文件:[{}]失败！", oldFile.getPath(), e);
 			result = "处理失败，报错信息：" + e.getMessage();
 			isSuccess = false;
+			newFile.delete();
 		}
 		return HandleResult.builder().result(result).success(isSuccess).build();
 	}

@@ -54,7 +54,6 @@ public class MainController implements Initializable {
 
     private Map<FileConvertType, Map<String, Object>> dataMap = new HashMap<>();
 
-    private static final String NEW_FILE_PREFIX = "new-";
     private Window currentWindow;
 
     @Override
@@ -110,7 +109,7 @@ public class MainController implements Initializable {
         String newPath;
         if (file != null && file.exists()) {
             handleInfo.setVisible(false);
-            newName = NEW_FILE_PREFIX + file.getName();
+            newName = currentType + "-" + file.getName();
             newPath = file.getParent() + DIR_SEPARATOR + newName;
             File newFile = new File(newPath);
             try {

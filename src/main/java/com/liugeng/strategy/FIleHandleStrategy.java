@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+
 public abstract class FIleHandleStrategy {
 
     protected final Map<String, Object> data;
@@ -15,6 +18,8 @@ public abstract class FIleHandleStrategy {
     public abstract void handleFile(File oldFile, File newFile) throws Exception ;
 
     public void setData(Map<String, Object> data) {
-        this.data.putAll(data);
+        if (MapUtils.isNotEmpty(data)) {
+            this.data.putAll(data);
+        }
     }
 }
