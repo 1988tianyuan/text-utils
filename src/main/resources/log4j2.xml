@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration status="WARN" monitorinterval="20">
+    <Properties>
+        <Property name="log.dir">logs</Property>
+    </Properties>
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %c{1.} %M - %msg%n%xEx{full}"/>
+        </Console>
+
+        <RollingFile name="Logs" fileName="${sys:log.dir}/fileConvertUtil.log"
+                     filePattern="${sys:log.dir}/fileConvertUtil.log.%d{yyyyMMdd}">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %c{1.} %M - %msg%n%xEx{full}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="200 MB"/>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+
+        <RollingFile name="Error" fileName="${sys:log.dir}/fileConvertUtil-error.log"
+                     filePattern="${sys:log.dir}/fileConvertUtil-error.log.%d{yyyyMMdd}">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %c{1.} %M - %msg%n%xEx{full}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="200 MB"/>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+    </appenders>
+    <loggers>
+        <root level="DEBUG">
+            <appender-ref ref="Console" level="INFO"/>
+            <appender-ref ref="Logs" level="INFO"/>
+            <appender-ref ref="Error" level="ERROR"/>
+        </root>
+
+    </loggers>
+</configuration>
