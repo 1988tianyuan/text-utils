@@ -139,12 +139,12 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
     private String layerPrefixBuilder(String code, int layerCount) {
         double falseVELCP = (double) data.get("falseVELCP");
         double trueVELCP = (double) data.get("trueVELCP");
-        return "$OUT[159]=FALSE\r\n"
-            + ";layer=" + layerCount + "\r\n"
-            + "$VEL.CP=" + falseVELCP + "\r\n"
+        return OUT_159_TRUE + "\r\n"
+            + ";" + PREFIX_LAYER + "=" + layerCount + "\r\n"
+            + VEL_CP + "="+ falseVELCP + "\r\n"
             + code + "\r\n"
-            + "$OUT[159]=TRUE\r\n"
-            + "$VEL.CP="+ trueVELCP;
+            + OUT_159_TRUE + "\r\n"
+            + VEL_CP + "="+ trueVELCP;
     }
     
     private String repetierCodeBuilder(String xValue, String yValue, String zValue, boolean needCVEL) {
