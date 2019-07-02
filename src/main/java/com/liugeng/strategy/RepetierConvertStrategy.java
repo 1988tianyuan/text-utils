@@ -21,8 +21,13 @@ import java.util.stream.Collectors;
 
 public class RepetierConvertStrategy extends FIleHandleStrategy {
 
+    private double falseVELCP;
+    private double trueVELCP;
+
     @Override
     public void handleFile(File oldFile, File newFile) throws Exception {
+        falseVELCP = (double) data.get("falseVELCP");
+        trueVELCP = (double) data.get("trueVELCP");
         try(BufferedReader reader = new BufferedReader(new FileReader(oldFile))) {
             List<String> filteredLines = reader.lines().filter(this::prefixFilter).collect(Collectors.toList());
             List<String> newLines = new LinkedList<>();
@@ -86,13 +91,31 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
     }
     
     private void handleLayerLines(LinkedList<String> codeQueue, List<String> newLines, String zValue) {
+        LinkedList<String> tmpF7800 = new LinkedList<>();
         while (codeQueue.size() > 0) {
             String line = codeQueue.pollLast();
-            String parsedLine = parseG1Line(line, zValue, true);
-            newLines.add(parsedLine);
+            if (isF7800Line(line)) {
+                tmpF7800.addFirst(line);
+            } else {
+                if (!tmpF7800.isEmpty()) {
+                    String f7800Line = tmpF7800.pollFirst();
+                    handleF7800Line(newLines, f7800Line, zValue);
+                    tmpF7800.clear();
+                }
+                String parsedLine = parseG1Line(line, zValue, true);
+                newLines.add(parsedLine);
+            }
         }
     }
-    
+
+    private void handleF7800Line(List<String> newLines, String f7800Line, String zValue) {
+        String parsedF7800Line = parseG1Line(f7800Line, zValue, false);
+        newLines.add(OUT_159_FALSE);
+        newLines.add(parsedF7800Line);
+        newLines.add(OUT_159_TRUE);
+        newLines.add(parsedF7800Line);
+    }
+
     private String parseZLine(String zLine) {
         return StringUtils.substringBetween(zLine, "Z", " ");
     }
@@ -118,6 +141,10 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
         boolean isZLine = StringUtils.startsWith(line, "G1 Z");
         return StringUtils.isNotBlank(line) && isZLine;
     }
+
+    private boolean isF7800Line(String line) {
+        return StringUtils.contains(line, F7800);
+    }
     
     private boolean isLayer(String line) {
         return StringUtils.startsWith(line, PREFIX_LAYER);
@@ -137,9 +164,7 @@ public class RepetierConvertStrategy extends FIleHandleStrategy {
     }
     
     private String layerPrefixBuilder(String code, int layerCount) {
-        double falseVELCP = (double) data.get("falseVELCP");
-        double trueVELCP = (double) data.get("trueVELCP");
-        return OUT_159_TRUE + "\r\n"
+        return OUT_159_FALSE + "\r\n"
             + ";" + PREFIX_LAYER + "=" + layerCount + "\r\n"
             + VEL_CP + "="+ falseVELCP + "\r\n"
             + code + "\r\n"

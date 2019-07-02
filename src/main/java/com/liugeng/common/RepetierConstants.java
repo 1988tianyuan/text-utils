@@ -11,4 +11,5 @@ public class RepetierConstants {
 	
 	public static final String OUT_159_FALSE = "$OUT[159]=FALSE";
 	public static final String OUT_159_TRUE = "$OUT[159]=TRUE";
+	public static final String F7800 = "F7800";
 }
